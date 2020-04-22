@@ -1,0 +1,12 @@
+__pycache__
+.DS_Store
+.idea
+db.sqlite3
+ignore
+*/migrations/*
+!*/migrations/__init__.py
+.env
+django_error.log
+media
+venv
+client
