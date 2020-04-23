@@ -1,46 +1,80 @@
+from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.generics import (
     ListAPIView,
-    CreateAPIView,
     RetrieveAPIView,
     DestroyAPIView,
-    get_object_or_404, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import AppUser, Post, Like
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import PostSerializer, AppUserSerializer, UserSerializer
-from .. import settings
+from .serializers import (
+    PostCreateSerializer,
+    AppUserSerializer,
+    PostSerializer,
+    LikeCreateSerializer
+)
+
+
+class AnalyticsListView(ListAPIView):
+    queryset = Like.objects.all()
+
+    def get_queryset(self, *args, **kwargs):
+        date_from = self.request.GET.get('date_from')
+        date_to = self.request.GET.get('date_to')
+        like_count = self.queryset.filter(created__range=[date_from, date_to]).count()
+        return Response({'like_count': like_count})
+
+
+class LikeUnlikePost(APIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Like.objects.all()
+    serializer = LikeCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        post_id = request.data['post_id']
+        user = AppUser.objects.get(user=request.user)
+        if Like.objects.filter(user=user, post_id__exact=post_id).count() == 0:
+            serializer = LikeCreateSerializer(data={'user': user.id, 'post': post_id})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(status=HTTP_201_CREATED, data={'message': 'Post liked'})
+        Like.objects.get(user=user, post_id__exact=post_id).delete()
+        return Response(status=HTTP_202_ACCEPTED, data={'message': 'Post Unliked'})
 
 
 class PostListView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
 
 class PostDetailView(RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
 
-class PostCreateView(CreateAPIView):
+class PostCreateView(APIView):
     permission_classes = (IsAuthenticated,)
     queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    serializer_class = PostCreateSerializer
 
-    def perform_create(self, serializer):
-        post = get_object_or_404(Post, id=self.request.data.get('post_id'))  # toDo: поменять
-        return serializer.save(post=post)
+    def post(self, request, *args, **kwargs):
+        user = AppUser.objects.get(user=request.user)
+        theme = request.data['theme']
+        serializer = PostCreateSerializer(data={'user': user.id, 'theme': theme})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=HTTP_201_CREATED, data={'message': 'Post created'})
 
 
 class PostDeleteView(DestroyAPIView):
-    permission_classes = (IsAuthenticated,)  # toDo: поменять, чтобы удалял только владелец
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    serializer_class = PostCreateSerializer
 
 
 class UserActivityList(ListAPIView):
@@ -62,30 +96,3 @@ class AppUserDetailView(RetrieveUpdateDestroyAPIView):
     queryset = AppUser.objects.all()
     serializer_class = AppUserSerializer
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny, ])
-# def authenticate_user(request):
-#     try:
-#         email = request.data['email']
-#         password = request.data['password']
-#
-#         user = User.objects.get(email=email, password=password)
-#         if user:
-#             try:
-#                 payload = jwt_payload_handler(user)
-#                 token = jwt.encode(payload, settings.SECRET_KEY)
-#                 user_details = {'name': f'{user.first_name} {user.last_name}', 'token': token}
-#                 user_logged_in.send(sender=user.__class__,
-#                                     request=request, user=user)
-#                 return Response(user_details, status=status.HTTP_200_OK)
-#
-#             except Exception as e:
-#                 raise e
-#         else:
-#             res = {
-#                 'error': 'can not authenticate with the given credentials or the account has been deactivated'}
-#             return Response(res, status=status.HTTP_403_FORBIDDEN)
-#     except KeyError:
-#         res = {'error': 'please provide a email and a password'}
-#         return Response(res)

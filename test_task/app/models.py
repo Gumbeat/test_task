@@ -31,7 +31,6 @@ class AppUser(Model):
     def update_last_login(sender, user, request, *args, **kwargs):
         update_last_login(None, user)
 
-
     def __str__(self):
         return self.user.username
 
