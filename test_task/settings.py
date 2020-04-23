@@ -122,8 +122,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_AUTH_TOKEN_CREATOR = 'test_task.app.token_creator.create_login_token'
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
