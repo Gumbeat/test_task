@@ -1,7 +1,8 @@
-Django==2.2.4
+django>=2.2.10
 djangorestframework==3.10.2
 djangorestframework_simplejwt==4.4.0
 PyJWT==1.7.1
 djoser==2.0.3
 psycopg2-binary==2.8.5
 django-filter==2.2.0
+requests==2.21.0
