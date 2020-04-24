@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  server:
+    build: .
+    entrypoint: sh run.sh
+    volumes:
+      - static_volume:/server/static
+      - media_volume:/server/media
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    restart: unless-stopped
+  db:
+    image: postgres:10
+    env_file:
+      - config/db_env
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  static_volume:
+  media_volume:
+  db_volume:

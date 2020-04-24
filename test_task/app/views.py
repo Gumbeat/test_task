@@ -1,10 +1,9 @@
-from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED
+from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_200_OK
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
     DestroyAPIView,
-    ListCreateAPIView,
     RetrieveUpdateDestroyAPIView
 )
 from rest_framework.response import Response
@@ -22,12 +21,13 @@ from .serializers import (
 
 class AnalyticsListView(ListAPIView):
     queryset = Like.objects.all()
+    serializer_class = LikeCreateSerializer
 
-    def get_queryset(self, *args, **kwargs):
-        date_from = self.request.GET.get('date_from')
-        date_to = self.request.GET.get('date_to')
+    def get(self, request, *args, **kwargs):
+        date_from = request.GET.get('date_from')
+        date_to = request.GET.get('date_to')
         like_count = self.queryset.filter(created__range=[date_from, date_to]).count()
-        return Response({'like_count': like_count})
+        return Response(status=HTTP_200_OK, data={'like_count': like_count})
 
 
 class LikeUnlikePost(APIView):
@@ -80,16 +80,6 @@ class PostDeleteView(DestroyAPIView):
 class UserActivityList(ListAPIView):
     queryset = AppUser.objects.all()
     serializer_class = AppUserSerializer
-
-
-class AppUserListCreateView(ListCreateAPIView):
-    queryset = AppUser.objects.all()
-    serializer_class = AppUserSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(user=user)
 
 
 class AppUserDetailView(RetrieveUpdateDestroyAPIView):

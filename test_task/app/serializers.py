@@ -9,13 +9,6 @@ from django.contrib.auth.models import User
 from .models import AppUser, Like, Post
 
 
-class UserSerializer(ModelSerializer):
-    class Meta(object):
-        model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
-
 class AppUserSerializer(ModelSerializer):
     last_login = SerializerMethodField()
     username = CharField(source='user.username', required=False)
@@ -30,13 +23,13 @@ class AppUserSerializer(ModelSerializer):
 
 
 class PostCreateSerializer(ModelSerializer):
-      class Meta:
+    class Meta:
         model = Post
         fields = ['user', 'theme']
 
 
 class LikeCreateSerializer(ModelSerializer):
-      class Meta:
+    class Meta:
         model = Like
         fields = ['user', 'post']
 

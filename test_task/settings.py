@@ -26,7 +26,7 @@ SECRET_KEY = '$zjzm4vbq2tdj(r7y&89%rv=2mkrjvna6*gtgb!8#js#!(kd81'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'test_task.wsgi.application'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
 }
 
 
@@ -98,8 +98,8 @@ DATABASES = {
         'NAME': 'test_task_db',
         'USER': 'admin',
         'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 

@@ -21,16 +21,12 @@ from test_task.app.views import (
     PostDetailView,
     PostDeleteView,
     UserActivityList,
-    AppUserListCreateView,
     AppUserDetailView,
     LikeUnlikePost,
     AnalyticsListView
 )
 
-from rest_registration.api import urls as reg_urls
-
 api_urlpatterns = [
-    path('create_user/', AppUserListCreateView.as_view(), name='create_user'),
     path('user/<int:pk>', AppUserDetailView.as_view(), name='user_detail'),
     path('user_activity/', UserActivityList.as_view(), name='user_activity'),
     path('posts/', PostListView.as_view(), name='posts'),
@@ -41,6 +37,7 @@ api_urlpatterns = [
     path('analytics/', AnalyticsListView.as_view(), name='likes_analytics'),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
+    # /api/auth/users/ - login
 ]
 
 

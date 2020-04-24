@@ -9,4 +9,5 @@ ignore
 django_error.log
 media
 venv
+env
 client
