@@ -10,4 +10,4 @@
 - [/api/like_post/](http://localhost:8000/api/like_post/) - *Like a post or unlike if already liked by a user*
 - [/api/analytics/](http://localhost:8000/api/analytics/) - *Analytics about like amount in certain date range (params are **date_from** and **date_to**)*
 ## Run Bot
-    python3 test_task/bot_app/run_bot.py
+    bash run_bot.sh
