@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, date
+
 from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_200_OK
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.generics import (
@@ -19,6 +21,11 @@ from .serializers import (
 )
 
 
+def date_range(start_date, end_date):
+    for n in range(int ((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+
 class AnalyticsListView(ListAPIView):
     queryset = Like.objects.all()
     serializer_class = LikeCreateSerializer
@@ -27,11 +34,14 @@ class AnalyticsListView(ListAPIView):
         df_str = 'date_from'
         dt_str = 'date_to'
         if df_str in request.GET and dt_str in request.GET:
-            date_from = request.GET.get(df_str)
-            date_to = request.GET.get(dt_str)
-            like_count = self.queryset.filter(created__range=[date_from, date_to]).count()
-        else:
-            like_count = self.queryset.all().count()
+            date_from = datetime.strptime(request.GET.get(df_str), "%Y-%m-%d")
+            date_to = datetime.strptime(request.GET.get(dt_str), "%Y-%m-%d")
+            analytics_data = []
+            for single_date in date_range(date_from, date_to):
+                like_count = self.queryset.filter(created=single_date.date()).count()
+                analytics_data.append({'date': single_date.date(), 'like_count': like_count})
+            return Response(status=HTTP_200_OK, data=analytics_data)
+        like_count = self.queryset.all().count()
         return Response(status=HTTP_200_OK, data={'like_count': like_count})
 
 
