@@ -24,9 +24,14 @@ class AnalyticsListView(ListAPIView):
     serializer_class = LikeCreateSerializer
 
     def get(self, request, *args, **kwargs):
-        date_from = request.GET.get('date_from')
-        date_to = request.GET.get('date_to')
-        like_count = self.queryset.filter(created__range=[date_from, date_to]).count()
+        df_str = 'date_from'
+        dt_str = 'date_to'
+        if df_str in request.GET and dt_str in request.GET:
+            date_from = request.GET.get(df_str)
+            date_to = request.GET.get(dt_str)
+            like_count = self.queryset.filter(created__range=[date_from, date_to]).count()
+        else:
+            like_count = self.queryset.all().count()
         return Response(status=HTTP_200_OK, data={'like_count': like_count})
 
 
