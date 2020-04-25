@@ -67,8 +67,8 @@ class PostCreateView(APIView):
         theme = request.data['theme']
         serializer = PostCreateSerializer(data={'user': user.id, 'theme': theme})
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=HTTP_201_CREATED, data={'message': 'Post created'})
+        new_post = serializer.save()
+        return Response(status=HTTP_201_CREATED, data={'message': 'Post created', 'post_id': new_post.id})
 
 
 class PostDeleteView(DestroyAPIView):
